@@ -1,9 +1,22 @@
 from datetime import date
 from typing import Literal
-
 from pydantic import BaseModel, Field, model_validator
-
-
+from datetime import datetime
+from decimal import Decimal
+from pydantic import ConfigDict
+class LeaveResponse(BaseModel):
+    id: int
+    employee_id: int
+    leave_date: date
+    leave_type: str
+    duration_type: str
+    half: str | None
+    hours: int | None
+    days_counted: Decimal
+    reason: str | None
+    status: str
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
 class LeaveCreate(BaseModel):
 
     # Date for which leave is requested

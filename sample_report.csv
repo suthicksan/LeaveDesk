@@ -1,0 +1,9 @@
+﻿date,request_type,leave_type,duration_type,half,hours,days_counted,status,reason,decided_by,decided_at
+2026-11-20,LEAVE,CASUAL,FULL_DAY,,,1.00,APPROVED,Personal work,Priya Manager,2026-11-19T10:30:00
+2026-11-23,WFH,,,,,1.00,APPROVED,Work from home,Priya Manager,2026-11-20T11:00:00
+
+Summary
+Approved leave days,1.00
+Approved WFH days,1
+Pending requests,0
+Rejected requests,0
