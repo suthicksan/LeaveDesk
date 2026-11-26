@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from datetime import date
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -48,16 +49,35 @@ def create_wfh(
 
 @router.get("/me", response_model=list[WFHResponse])
 def get_my_wfh_requests(
+    status_filter: str | None = Query(default=None, alias="status"),
+    from_date: date | None = None,
+    to_date: date | None = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    query = (
-        select(WFHRequest)
-        .where(WFHRequest.employee_id == current_user.id)
-        .order_by(WFHRequest.created_at.desc())
+    query = select(WFHRequest).where(
+        WFHRequest.employee_id == current_user.id
     )
 
+    if status_filter:
+        query = query.where(
+            WFHRequest.status == status_filter.upper()
+        )
+
+    if from_date:
+        query = query.where(
+            WFHRequest.end_date >= from_date
+        )
+
+    if to_date:
+        query = query.where(
+            WFHRequest.start_date <= to_date
+        )
+
+    query = query.order_by(WFHRequest.created_at.desc())
+
     return db.scalars(query).all()
+
 
 
 @router.post("/{wfh_id}/cancel")

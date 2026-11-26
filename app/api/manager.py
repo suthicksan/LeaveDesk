@@ -1,5 +1,5 @@
 from datetime import date, datetime, timezone
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.core.auth import get_current_user, require_role
@@ -20,7 +20,7 @@ get_current_manager = require_role("manager")
 
 @router.get("/requests")
 def get_team_requests(
-    status_filter: str = "PENDING",
+    status_filter: str = Query(default="PENDING", alias="status"),
     employee_id: int | None = None,
     from_date: date | None = None,
     to_date: date | None = None,
@@ -50,12 +50,14 @@ def get_team_requests(
     )
 
     if status_filter:
-        leave_query = leave_query.where(
-            LeaveRequest.status == status_filter
-        )
-        wfh_query = wfh_query.where(
-            WFHRequest.status == status_filter
-        )
+      status_value = status_filter.upper()
+
+      leave_query = leave_query.where(
+        LeaveRequest.status == status_value
+    )
+      wfh_query = wfh_query.where(
+        WFHRequest.status == status_value
+    )
 
     if employee_id is not None:
         leave_query = leave_query.where(

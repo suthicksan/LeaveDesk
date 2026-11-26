@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from app.core.auth import get_current_user
 from app.db.dependencies import get_db
@@ -34,7 +34,7 @@ def create_leave(
     if conflict:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail="An active leave request already conflicts with this date",
+            detail="An active leave or WFH request conflicts with this date",
         )
 
     leave_request = LeaveRequest(
@@ -55,9 +55,10 @@ def create_leave(
 
     return leave_request
 
+
 @router.get("/me", response_model=list[LeaveResponse])
 def get_my_leaves(
-    status_filter: str | None = None,
+    status_filter: str | None = Query(default=None, alias="status"),
     from_date: date | None = None,
     to_date: date | None = None,
     db: Session = Depends(get_db),
@@ -68,13 +69,19 @@ def get_my_leaves(
     )
 
     if status_filter:
-        query = query.where(LeaveRequest.status == status_filter.upper())
+        query = query.where(
+            LeaveRequest.status == status_filter.upper()
+        )
 
     if from_date:
-        query = query.where(LeaveRequest.leave_date >= from_date)
+        query = query.where(
+            LeaveRequest.leave_date >= from_date
+        )
 
     if to_date:
-        query = query.where(LeaveRequest.leave_date <= to_date)
+        query = query.where(
+            LeaveRequest.leave_date <= to_date
+        )
 
     query = query.order_by(LeaveRequest.created_at.desc())
 
